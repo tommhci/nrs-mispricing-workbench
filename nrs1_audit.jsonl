@@ -1,0 +1,8 @@
+{"ts": "2026-05-29T15:40:43.379483+00:00", "session_id": "NRS1-20260529-114043", "stage": "orchestrator", "event": "start", "detail": {"mode": "live"}, "gate_reasons": null}
+{"ts": "2026-05-29T15:40:54.107635+00:00", "session_id": "NRS1-20260529-114043", "stage": "gate_1", "event": "PASSED", "detail": null, "gate_reasons": []}
+{"ts": "2026-05-29T15:40:54.108944+00:00", "session_id": "NRS1-20260529-114043", "stage": "gate_2", "event": "PASSED", "detail": null, "gate_reasons": ["WARN: 3 open constraints"]}
+{"ts": "2026-05-29T15:41:05.963976+00:00", "session_id": "NRS1-20260529-114043", "stage": "gate_3", "event": "PASSED", "detail": null, "gate_reasons": ["WARN: no market data \u2014 MR_gap excluded"]}
+{"ts": "2026-05-29T15:41:05.966961+00:00", "session_id": "NRS1-20260529-114043", "stage": "gate_4", "event": "PASSED", "detail": {"gap_index": 0.902, "gap_label": "STRONG_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-05-29T15:41:05.968328+00:00", "session_id": "NRS1-20260529-114043", "stage": "gate_5", "event": "PASSED", "detail": null, "gate_reasons": null}
+{"ts": "2026-05-29T15:41:05.971513+00:00", "session_id": "NRS1-20260529-114043", "stage": "report", "event": "written", "detail": {"path": "nrs1_report.md"}, "gate_reasons": null}
+{"ts": "2026-05-29T15:41:05.972695+00:00", "session_id": "NRS1-20260529-114043", "stage": "orchestrator", "event": "complete", "detail": {"gap_index": 0.902, "gap_label": "STRONG_MISMATCH"}, "gate_reasons": null}
