@@ -1,0 +1,19 @@
+
+================================================================
+  NRS-1 v3 — BACKTEST LIVE (Stage B: agent accuracy test)
+================================================================
+  Model: glm-4.7-flash  |  n_runs=3 (median aggregation)
+  Metric: |GLM feasibility_score - oracle| per case
+
+  [NVDA-BLACKWELL-2024]  fetching: NVDA Q2 FY2025 8-K (Aug 28 2024) — closest primary filing; H...
+    ✗ No relevant EDGAR document found in ±14-day window. Skipping.
+  [NVDA-DC-GUIDANCE-2023]  fetching: NVDA Q1 FY2024 8-K (May 24 2023) — original datacenter guida...
+    ✗ No relevant EDGAR document found in ±14-day window. Skipping.
+  [INTC-7NM-2020]  fetching: INTC Q2 2020 8-K (Jul 23 2020) — 7nm delay disclosure; yield...
+    ✗ No relevant EDGAR document found in ±14-day window. Skipping.
+  [AMD-MI300X-2023]  fetching: AMD 8-K (Dec 6 2023) — MI300X launch + ROCm 6 (AMD IR 2023-1...
+    ✗ No relevant EDGAR document found in ±14-day window. Skipping.
+  [TSMC-N3-2023]  fetching: TSM 6-K / Q1 2023 earnings (around Apr 20 2023) — TSMC guide...
+    ✗ No relevant EDGAR document found in ±14-day window. Skipping.
+
+  No cases completed (no EDGAR documents or GLM failures).
