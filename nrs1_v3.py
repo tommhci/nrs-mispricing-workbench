@@ -1245,6 +1245,16 @@ def write_history(session_id, narrative, reality, market, gap, mode="stub"):
         f.write(json.dumps(record, default=str) + "\n")
     print(f"  [HISTORY] Record appended (gap_index={gap.gap_index})")
 
+    # Mirror to SQLite so the dashboard reflects this run immediately.
+    # (db.migrate_from_jsonl() at dashboard startup would catch it anyway,
+    # but calling write_run() here keeps SQLite always in sync.)
+    try:
+        import db
+        db.ensure_ready()
+        db.write_run(record)
+    except Exception as _db_e:
+        print(f"  [DB] SQLite write skipped: {_db_e}  (JSONL record is safe)")
+
 
 # ════════════════════════════════════════════════════════════════
 #  MODULE 3 — EMAIL DISPATCH (unchanged from v2)
