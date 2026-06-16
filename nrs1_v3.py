@@ -58,6 +58,53 @@ WATCH_TICKERS = ["NVDA", "AMD", "TSMC", "INTC", "AVGO", "ASML", "MOD", "SMCI"]
 WATCH_TOPICS  = ["AI chip", "GPU", "semiconductor", "datacenter", "liquid cooling",
                  "HBM", "CoWoS", "3nm", "inference", "training cluster"]
 
+# Engineering vocabulary — used to reject non-engineering filings (e.g. CFO
+# departures, buyback authorizations) that mention a ticker but contain zero
+# verifiable engineering content. See is_engineering_relevant().
+ENGINEERING_TERMS = [
+    "yield", "capacity", "shipment", "production", "volume", "nm", "wafer",
+    "bandwidth", "efficiency", "constraint", "supply", "delay", "ramp",
+    "throughput", "architecture", "fabrication", "node", "packaging",
+    "memory", "node", "tape-out", "tapeout", "lithography", "thermal",
+]
+ENGINEERING_RELEVANCE_THRESHOLD = 3   # min distinct engineering terms required
+
+
+def is_engineering_relevant(content: str,
+                            threshold: int = ENGINEERING_RELEVANCE_THRESHOLD) -> bool:
+    """
+    True if `content` contains at least `threshold` DISTINCT engineering terms.
+    Guards Tier 1 (EDGAR) against high-credibility but engineering-empty filings:
+    a CFO-departure 8-K is Tier 1 by source, but contains no verifiable claim.
+    """
+    if not content:
+        return False
+    low = content.lower()
+    hits = {t for t in ENGINEERING_TERMS if t in low}
+    return len(hits) >= threshold
+
+
+def verify_quote(quote: str, content: str) -> bool:
+    """
+    True if `quote` is genuinely grounded in `content`.
+    Primary check: normalized substring match.
+    Fallback: >=85% token overlap (tolerates minor punctuation/whitespace drift).
+    Returns False when the LLM likely hallucinated the verbatim_quote.
+    """
+    if not quote or not content:
+        return False
+    norm = lambda s: re.sub(r"\s+", " ", s.lower()).strip()
+    nq, nc = norm(quote), norm(content)
+    if len(nq) < 8:
+        return False
+    if nq in nc:
+        return True
+    q_tokens = [t for t in re.findall(r"\w+", nq) if len(t) > 3]
+    if not q_tokens:
+        return False
+    overlap = sum(1 for t in q_tokens if t in nc) / len(q_tokens)
+    return overlap >= 0.85
+
 # SEC EDGAR CIK map (no leading zeros needed for URL, but kept for clarity)
 EDGAR_CIK = {
     "NVDA": "0001045810",
@@ -180,6 +227,14 @@ def fetch_edgar_filings(ticker: str, days_back: int = 14) -> list[SourceDocument
             kw_hits = sum(1 for kw in WATCH_TOPICS if kw.lower() in body.lower())
             ticker_hits = ticker.upper() in body.upper()
             if kw_hits == 0 and not ticker_hits:
+                continue
+
+            # Engineering-relevance gate (Tier 1 quality guard):
+            # reject filings that mention the ticker but carry no verifiable
+            # engineering content (CFO departures, buybacks, governance, etc.)
+            if not is_engineering_relevant(body):
+                print(f"  [EDGAR] skip {ticker} {form} {dates[i]} "
+                      f"— below engineering relevance threshold")
                 continue
 
             results.append(SourceDocument(
@@ -664,6 +719,15 @@ def live_narrative_agent(document: SourceDocument) -> Optional[NarrativeObject]:
         return None
 
     try:
+        raw_quote = data.get("verbatim_quote", "")
+        # Hallucination guard: verify the quote actually exists in the source.
+        # Only meaningful when we have document body (Tier 1/2). For Tier 3
+        # (headline-only, empty content) we skip verification.
+        quote = raw_quote
+        if raw_quote and document.content and not verify_quote(raw_quote, document.content):
+            print(f"  [LLM] ⚠ verbatim_quote not found in source — marking unverified")
+            quote = "[UNVERIFIED] " + raw_quote
+
         return NarrativeObject(
             claim=data["claim"],
             source_url=document.url,
@@ -674,7 +738,7 @@ def live_narrative_agent(document: SourceDocument) -> Optional[NarrativeObject]:
             source_tier=document.source_tier,
             source_name=document.source_name,
             doc_type=document.doc_type,
-            verbatim_quote=data.get("verbatim_quote", ""),
+            verbatim_quote=quote,
         )
     except (KeyError, ValueError) as e:
         print(f"  [LLM] Narrative schema error: {e}")
@@ -1420,6 +1484,28 @@ def run_tests():
     check("T5a stub_source relevance_score > 0",
           doc.relevance_score() > 0, f"got {doc.relevance_score()}")
     check("T5b stub_source is Tier 1", doc.source_tier == 1)
+
+    # T7: Engineering-relevance gate (EDGAR Tier 1 quality guard)
+    eng_text = ("Volume production ramp at the 3nm node; wafer yield and CoWoS "
+                "packaging capacity constrain shipment throughput.")
+    non_eng  = ("The Board appointed a new Chief Financial Officer effective "
+                "immediately and authorized a share repurchase program.")
+    check("T7a engineering text passes relevance gate",
+          is_engineering_relevant(eng_text))
+    check("T7b CFO/buyback filing rejected by relevance gate",
+          not is_engineering_relevant(non_eng))
+    check("T7c empty content rejected", not is_engineering_relevant(""))
+
+    # T8: verbatim_quote hallucination guard
+    src_body = ("NVIDIA commenced volume production of Blackwell at TSMC N4P, "
+                "with initial deliveries beginning Q1 2027 subject to CoWoS capacity.")
+    check("T8a exact quote verified",
+          verify_quote("initial deliveries beginning Q1 2027", src_body))
+    check("T8b whitespace-variant quote verified",
+          verify_quote("initial   deliveries  beginning Q1 2027", src_body))
+    check("T8c fabricated quote rejected",
+          not verify_quote("the CEO confirmed a 90 percent gross margin target", src_body))
+    check("T8d empty quote rejected", not verify_quote("", src_body))
 
     # T6: History record keys
     write_history("test-session", n, r, stub_market(), gap, mode="test")
