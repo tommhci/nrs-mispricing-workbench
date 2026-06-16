@@ -1515,8 +1515,255 @@ def run_tests():
     for key in ("source_tier", "source_name", "doc_type", "ev_ceiling"):
         check(f"T6 history record has key '{key}'", key in last)
 
+    # T9: Backtest directional validation (regression-locks documented behavior)
+    bt = run_backtest()
+    check("T9a backtest runs all cases",
+          bt["total"] == len(HISTORICAL_CASES), f"got {bt['total']}")
+    check("T9b accuracy in [0,1]",
+          0.0 <= bt["accuracy"] <= 1.0, f"got {bt['accuracy']}")
+    bt_by_id = {x["case_id"]: x for x in bt["results"]}
+    check("T9c NVDA Blackwell case flagged MISMATCH",
+          bt_by_id["NVDA-BLACKWELL-2024"]["predicted"] == "MISMATCH")
+    check("T9d NVDA DC-guidance case flagged ALIGNED",
+          bt_by_id["NVDA-DC-GUIDANCE-2023"]["predicted"] == "ALIGNED")
+    check("T9e TSMC-N3 pessimism case is the documented miss",
+          not bt_by_id["TSMC-N3-2023"]["hit"]
+          and bt_by_id["TSMC-N3-2023"]["predicted"] == "ALIGNED")
+    check("T9f backtest accuracy == 0.8 (4/5 hits)",
+          bt["accuracy"] == 0.8, f"got {bt['accuracy']}")
+
     print(f"\n  Results: {passed} passed, {failed} failed")
     return failed == 0
+
+
+# ════════════════════════════════════════════════════════════════
+#  BACKTEST — directional validation against real historical events
+# ════════════════════════════════════════════════════════════════
+#
+#  WHAT THIS DOES (and does NOT) VALIDATE
+#  ---------------------------------------
+#  Each case below feeds an ORACLE reality assessment — i.e. the
+#  engineering truth we now know retrospectively — into the Gap Index.
+#  Therefore this backtest validates ONLY the SCORING FORMULA:
+#      "Given a correct reality assessment, does NR_gap correctly flag
+#       a narrative-reality divergence that history later confirmed?"
+#
+#  It does NOT validate the RealityAgent (the LLM's ability to PRODUCE
+#  a correct reality assessment from a live document). That is a separate,
+#  harder test ("Stage B") requiring live GLM calls on archived documents.
+#
+#  Market data is EXCLUDED from scoring (m_implied=None) so gap_index == NR_gap.
+#  This isolates the core claim: narrative-vs-reality divergence detection.
+#  The real ~5-day market return is shown only as CONTEXT, not as a score input.
+#
+#  Cases are author-encoded representations of well-documented PUBLIC events.
+#  Reality inputs are retrospective. Claims are paraphrased, not verbatim quotes.
+# ════════════════════════════════════════════════════════════════
+
+@dataclass
+class BacktestCase:
+    case_id:       str
+    date:          str            # event date (ISO)
+    ticker:        str
+    description:   str
+    narrative:     dict           # sentiment_polarity, propagation, novelty, certainty, claim
+    reality:       dict           # feasibility_score, constraint_penalty, evidence_strength, ...
+    market_return: Optional[float]  # real ~5d return around event (public, for CONTEXT only)
+    expected:      str            # "MISMATCH" | "ALIGNED" (ground-truth direction)
+    resolution:    str            # what actually happened
+    source_note:   str            # public event reference
+
+
+HISTORICAL_CASES = [
+    BacktestCase(
+        case_id="NVDA-BLACKWELL-2024",
+        date="2024-08-05",
+        ticker="NVDA",
+        description="Bullish narrative of imminent Blackwell volume ramp vs packaging/mask reality",
+        narrative=dict(
+            claim="NVIDIA Blackwell is ramping to volume shipments imminently with no material delay.",
+            sentiment_polarity=1.0, propagation=1.0, novelty="first_report", certainty="high"),
+        reality=dict(
+            technical_change="Blackwell volume production at TSMC with CoWoS-L packaging",
+            feasibility_score=0.5, constraint_penalty=0.4, evidence_strength="moderate",
+            open_constraints=["CoWoS-L packaging capacity", "GPU mask/photomask revision"],
+            hardware_constraint="Advanced packaging (CoWoS-L) throughput",
+            supply_chain_risk="HBM3e + packaging shared constraints",
+            primary_constraint="CoWoS-L packaging capacity"),
+        market_return=-0.05,
+        expected="MISMATCH",
+        resolution=("Reports (Aug 2024) flagged a Blackwell design/packaging issue; volume "
+                    "shipments slipped toward Q4 2024–Q1 2025. Narrative was ahead of engineering reality."),
+        source_note="Public reporting on Blackwell delay, early Aug 2024."),
+
+    BacktestCase(
+        case_id="NVDA-DC-GUIDANCE-2023",
+        date="2023-05-24",
+        ticker="NVDA",
+        description="Bullish datacenter guidance that engineering + demand reality actually supported",
+        narrative=dict(
+            claim="NVIDIA datacenter demand is accelerating sharply with strong forward guidance.",
+            sentiment_polarity=1.0, propagation=1.0, novelty="first_report", certainty="high"),
+        reality=dict(
+            technical_change="H100 datacenter GPU supply scaling to meet AI training demand",
+            feasibility_score=0.9, constraint_penalty=0.05, evidence_strength="strong",
+            open_constraints=[],
+            hardware_constraint="CoWoS capacity (scaling, not blocking)",
+            supply_chain_risk="low",
+            primary_constraint="none binding"),
+        market_return=0.24,
+        expected="ALIGNED",
+        resolution=("NVDA's May 2023 datacenter guidance proved accurate; revenue ramped as claimed. "
+                    "Narrative matched reality — market re-rated ~+24%."),
+        source_note="NVDA FY24 Q1 earnings, 24 May 2023; ~24% next-day move."),
+
+    BacktestCase(
+        case_id="INTC-7NM-2020",
+        date="2020-07-24",
+        ticker="INTC",
+        description="Reassuring 'process on-track' narrative vs yield reality",
+        narrative=dict(
+            claim="Intel's advanced process roadmap remains on track for near-term product delivery.",
+            sentiment_polarity=0.5, propagation=0.5, novelty="echo", certainty="moderate"),
+        reality=dict(
+            technical_change="Intel 7nm process node yield/defect density",
+            feasibility_score=0.25, constraint_penalty=0.3, evidence_strength="moderate",
+            open_constraints=["7nm defect density", "yield learning rate"],
+            hardware_constraint="Process node yield",
+            supply_chain_risk="internal fab dependency",
+            primary_constraint="7nm yield"),
+        market_return=-0.16,
+        expected="MISMATCH",
+        resolution=("Intel announced a ~6-month 7nm delay on 23 Jul 2020; stock fell ~16%. The prior "
+                    "'on-track' narrative was mispriced against yield reality."),
+        source_note="Intel Q2 2020 earnings, 23 Jul 2020; 7nm delay disclosure."),
+
+    BacktestCase(
+        case_id="AMD-MI300X-2023",
+        date="2023-12-06",
+        ticker="AMD",
+        description="Hardware-competitive AI accelerator claim vs software-ecosystem reality",
+        narrative=dict(
+            claim="AMD MI300X competes directly with NVIDIA H100 for AI workloads at launch.",
+            sentiment_polarity=1.0, propagation=1.0, novelty="first_report", certainty="high"),
+        reality=dict(
+            technical_change="MI300X hardware competitiveness + ROCm software stack maturity",
+            feasibility_score=0.7, constraint_penalty=0.35, evidence_strength="moderate",
+            open_constraints=["ROCm software maturity", "framework/library support", "customer migration cost"],
+            hardware_constraint="none material (hardware competitive)",
+            supply_chain_risk="moderate",
+            primary_constraint="ROCm software ecosystem maturity"),
+        market_return=0.02,
+        expected="MISMATCH",
+        resolution=("MI300X hardware was competitive, but real-world adoption was gated by ROCm software "
+                    "maturity through 2024; revenue ramped slower than the launch narrative implied."),
+        source_note="AMD MI300X launch, 6 Dec 2023; ROCm maturity widely cited as adoption gate."),
+
+    BacktestCase(
+        case_id="TSMC-N3-2023",
+        date="2023-04-20",
+        ticker="TSM",
+        description="Skeptical narrative (yields disappointing) vs strong actual ramp — pessimism mispricing",
+        narrative=dict(
+            claim="TSMC N3 yields are disappointing and the ramp is underwhelming.",
+            sentiment_polarity=-0.5, propagation=0.5, novelty="echo", certainty="moderate"),
+        reality=dict(
+            technical_change="TSMC N3 (3nm) yield and volume ramp",
+            feasibility_score=0.8, constraint_penalty=0.1, evidence_strength="strong",
+            open_constraints=["ramp pace"],
+            hardware_constraint="none material",
+            supply_chain_risk="low",
+            primary_constraint="none binding"),
+        market_return=0.06,
+        expected="MISMATCH",
+        resolution=("N3 ramped successfully through 2023 and became a major revenue contributor. The "
+                    "skeptical narrative understated reality — a genuine (pessimism-driven) mispricing."),
+        source_note="TSMC N3 ramp, 2023 (illustrative encoding of under-coverage vs actual ramp)."),
+]
+
+
+def _backtest_objects(case: BacktestCase):
+    """Build NarrativeObject + RealityObject + (market-excluded) MarketObject from a case."""
+    n = NarrativeObject(
+        claim=case.narrative["claim"],
+        source_url=f"backtest://{case.case_id}",
+        sentiment_polarity=case.narrative["sentiment_polarity"],
+        propagation=case.narrative["propagation"],
+        novelty=case.narrative["novelty"],
+        certainty=case.narrative["certainty"],
+        source_tier=1, source_name="backtest", doc_type="historical",
+        verbatim_quote=case.narrative["claim"],
+    )
+    rd = case.reality
+    r = RealityObject(
+        technical_change=rd["technical_change"],
+        feasibility_score=rd["feasibility_score"],
+        constraint_penalty=rd["constraint_penalty"],
+        evidence_strength=rd["evidence_strength"],
+        open_constraints=rd.get("open_constraints", []),
+        hardware_constraint=rd.get("hardware_constraint", ""),
+        supply_chain_risk=rd.get("supply_chain_risk", ""),
+        evidence_ceiling="strong",   # oracle: not tier-limited
+        primary_constraint=rd.get("primary_constraint", ""),
+        comparable_events=[],
+    )
+    # Market EXCLUDED from scoring → gap_index == NR_gap
+    m = MarketObject(ticker=case.ticker, event_date=case.date,
+                     event_window_return=None, data_quality="excluded")
+    return n, r, m
+
+
+def run_backtest(threshold: float = 0.35) -> dict:
+    """
+    Run all historical cases and report directional accuracy.
+    A case is a HIT when the predicted bucket matches the known outcome:
+      predicted = MISMATCH  if gap_index >= threshold  else ALIGNED
+    Returns summary dict with per-case results and overall accuracy.
+    """
+    print("\n" + "=" * 64)
+    print("  NRS-1 v3 — BACKTEST (directional formula validation)")
+    print("=" * 64)
+    print("  NOTE: oracle reality inputs · market EXCLUDED from score · "
+          "gap_index == NR_gap")
+    print("  Validates the FORMULA, not the RealityAgent. See module header.\n")
+
+    results = []
+    hits = 0
+    for case in HISTORICAL_CASES:
+        n, r, m = _backtest_objects(case)
+        gap = compute_gap_index(n, r, m)
+        gi = gap.gap_index if gap.gap_index is not None else 0.0
+        predicted = "MISMATCH" if gi >= threshold else "ALIGNED"
+        hit = (predicted == case.expected)
+        hits += int(hit)
+        results.append({
+            "case_id": case.case_id, "ticker": case.ticker, "date": case.date,
+            "gap_index": gap.gap_index, "gap_label": gap.gap_label,
+            "n_score": gap.n_score, "r_score": gap.r_score,
+            "predicted": predicted, "expected": case.expected,
+            "hit": hit, "market_return": case.market_return,
+            "resolution": case.resolution,
+        })
+        mark = "✓ HIT " if hit else "✗ MISS"
+        mret = (f"{case.market_return*100:+.0f}%" if case.market_return is not None else "n/a")
+        print(f"  {mark} | {case.case_id:22s} | gap={gi:.3f} ({gap.gap_label:17s})"
+              f" pred={predicted:8s} exp={case.expected:8s} | mkt~{mret}")
+
+    total = len(HISTORICAL_CASES)
+    accuracy = round(hits / total, 4) if total else 0.0
+    print(f"\n  Directional accuracy: {hits}/{total} = {accuracy:.0%}")
+
+    misses = [x for x in results if not x["hit"]]
+    if misses:
+        print("\n  Documented misses (formula limitations surfaced by backtest):")
+        for x in misses:
+            print(f"    - {x['case_id']}: predicted {x['predicted']} but "
+                  f"reality was {x['expected']}")
+            print(f"      gap={x['gap_index']:.3f} (N={x['n_score']:.3f}, R={x['r_score']:.3f})")
+            print(f"      → {x['resolution'][:90]}...")
+    print()
+
+    return {"total": total, "hits": hits, "accuracy": accuracy, "results": results}
 
 
 # ════════════════════════════════════════════════════════════════
@@ -1540,9 +1787,13 @@ if __name__ == "__main__":
         ok = run_tests()
         sys.exit(0 if ok else 1)
 
+    elif "--backtest" in args:
+        summary = run_backtest()
+        # exit 0 always — a backtest "miss" is a finding, not a failure
+        sys.exit(0)
+
     elif "--test-edgar" in args:
-        idx = args.index("--test-edgar")
-        ticker = args[idx + 1] if idx + 1 < len(args) else "NVDA"
+        ticker = args[args.index("--test-edgar") + 1] if args.index("--test-edgar") + 1 < len(args) else "NVDA"
         print(f"\n[TEST-EDGAR] Fetching EDGAR filings for {ticker}...")
         docs = fetch_edgar_filings(ticker, days_back=30)
         print(f"  Found {len(docs)} relevant filings:")
