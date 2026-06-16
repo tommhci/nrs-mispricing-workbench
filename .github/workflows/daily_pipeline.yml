@@ -1,13 +1,13 @@
-name: NRS-1 Daily Pipeline
+name: NRS-1 v3 Daily Pipeline
 
 on:
   schedule:
-    # Runs at 08:00 UTC every day (adjust for your timezone)
-    # UTC+8 (China/Singapore): 08:00 UTC = 16:00 local
-    # UTC-5 (Eastern US):      08:00 UTC = 03:00 local
-    - cron: '0 8 * * *'
+    # Runs at 12:00 UTC daily (market hours context)
+    # UTC+8 (China/Singapore): 12:00 UTC = 20:00 local
+    # UTC-5 (Eastern US):      12:00 UTC = 07:00 local
+    - cron: '0 12 * * *'
 
-  # Also allows manual trigger from GitHub Actions tab
+  # Manual trigger from GitHub Actions tab
   workflow_dispatch:
 
 jobs:
@@ -24,20 +24,26 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests anthropic yfinance
+        run: pip install openai requests yfinance pandas
 
-      - name: Run NRS-1 pipeline (stub mode)
-        # Change --stub to nothing when you have a real API key set in secrets
-        run: python nrs1_v2.py --stub
+      - name: Run NRS-1 v3 pipeline
+        # --stub: uses hardcoded data (no API key needed for testing)
+        # Remove --stub once ZHIPU_API_KEY is set in repo secrets
+        run: python nrs1_v3.py --stub
         env:
-          # Add your API key in: GitHub repo → Settings → Secrets → Actions
-          # Then remove --stub from the run command above
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Set in: GitHub repo → Settings → Secrets → Actions → New repository secret
+          # Name: ZHIPU_API_KEY, Value: <your key from open.bigmodel.cn>
+          # Then remove --stub from the run command above to enable live mode
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          GMAIL_SENDER:       ${{ secrets.GMAIL_SENDER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_RECIPIENT:    ${{ secrets.GMAIL_RECIPIENT }}
 
       - name: Commit updated data files
         run: |
           git config --local user.email "nrs1-bot@github.com"
-          git config --local user.name "NRS-1 Pipeline Bot"
+          git config --local user.name "NRS-1 v3 Bot"
           git add nrs1_history.jsonl nrs1_report.md nrs1_audit.jsonl
-          git diff --staged --quiet || git commit -m "🤖 NRS-1 daily update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git diff --staged --quiet || git commit -m \
+            "🤖 NRS-1 v3 $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
