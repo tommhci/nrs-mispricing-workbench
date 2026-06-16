@@ -1,0 +1,107 @@
+name: NRS-1 Research Agent
+
+# ── PURPOSE ─────────────────────────────────────────────────────────────────────
+# One-click AI research: GLM uses its web_search tool to find current news/filings
+# about a ticker+topic, then judges whether the narrative is real fundamental
+# change vs. mispricing. Unlike --backtest-live, this needs NO historical EDGAR
+# documents — GLM searches live, so it works for any current question.
+#
+# HOW TO RUN: repo -> Actions -> "NRS-1 Research Agent" -> Run workflow
+#   then type a ticker and a topic.
+# ────────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: 'Ticker to research (e.g. NVDA, AMD, TSM, INTC)'
+        required: true
+        default: 'NVDA'
+      topic:
+        description: 'What to investigate'
+        required: true
+        default: 'Blackwell GPU production ramp status'
+      model:
+        description: 'GLM model'
+        required: false
+        default: 'glm-4.7-flash'
+
+permissions:
+  contents: write
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install openai requests yfinance pandas
+
+      # ── PREFLIGHT: confirm the secret reached the runner (never echoed)
+      - name: Preflight — verify ZHIPU_API_KEY secret
+        env:
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        run: |
+          if [ -z "$ZHIPU_API_KEY" ]; then
+            echo "::error::ZHIPU_API_KEY is EMPTY in this job."
+            echo "Add a Repository secret named EXACTLY 'ZHIPU_API_KEY' under"
+            echo "Settings -> Secrets and variables -> Actions -> Repository secrets."
+            exit 1
+          fi
+          echo "OK: ZHIPU_API_KEY is present (length: ${#ZHIPU_API_KEY} chars)."
+
+      # ── MAIN: run the research agent on the requested ticker + topic
+      # Inputs passed via env (not direct interpolation) to avoid shell-quote breakage.
+      - name: Run research_agent.py
+        env:
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          GLM_MODEL: ${{ github.event.inputs.model }}
+          INPUT_TICKER: ${{ github.event.inputs.ticker }}
+          INPUT_TOPIC: ${{ github.event.inputs.topic }}
+        run: |
+          set -o pipefail
+          echo "Ticker: $INPUT_TICKER"
+          echo "Topic:  $INPUT_TOPIC"
+          echo "Model:  $GLM_MODEL"
+          echo "───────────────────────────────────────────────"
+          python research_agent.py "$INPUT_TICKER" "$INPUT_TOPIC" 2>&1 | tee research_output.txt
+
+      - name: Show result in log
+        if: always()
+        run: |
+          echo "════════════════ RESEARCH OUTPUT ════════════════"
+          cat research_output.txt 2>/dev/null || echo "(no output produced)"
+          echo "══════════════════════════════════════════════════"
+
+      - name: Upload result artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-result
+          path: research_output.txt
+
+      - name: Commit result to repo
+        if: always()
+        continue-on-error: true
+        env:
+          INPUT_TICKER: ${{ github.event.inputs.ticker }}
+        run: |
+          git config --local user.email "nrs1-bot@github.com"
+          git config --local user.name "NRS-1 Bot"
+          TIMESTAMP=$(date -u '+%Y%m%d_%H%M%S')
+          SAFE_TICKER=$(echo "$INPUT_TICKER" | tr -cd '[:alnum:]._-')
+          mkdir -p results
+          cp research_output.txt "results/research_${SAFE_TICKER}_${TIMESTAMP}.txt" 2>/dev/null || true
+          git add results/ 2>/dev/null || true
+          git diff --staged --quiet || git commit -m \
+            "research: ${SAFE_TICKER} $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push || echo "::warning::Could not push result. It is still in the log + artifact above."
