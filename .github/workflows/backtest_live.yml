@@ -1,0 +1,73 @@
+name: NRS-1 Backtest Live (Stage B)
+
+# ── PURPOSE ─────────────────────────────────────────────────────────────────────
+# One-click validation: tests if GLM can produce calibrated feasibility scores
+# from real EDGAR documents vs hand-verified oracle values.
+#
+# Result: MAE (Mean Absolute Error) of feasibility_score
+#   ≤ 0.15  →  Signal meaningful for production use
+#   0.15-0.30 → Directional only, noisy
+#   ≥ 0.30  →  Scores unreliable — fix agent before adding features
+#
+# HOW TO RUN:
+#   GitHub repo → Actions tab → "NRS-1 Backtest Live" → Run workflow
+# ────────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'GLM model to test (default: glm-4.7-flash)'
+        required: false
+        default: 'glm-4.7-flash'
+
+jobs:
+  backtest-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install openai requests yfinance pandas
+
+      - name: Run --backtest-live
+        id: backtest
+        run: |
+          echo "═══════════════════════════════════════════════════"
+          echo "  NRS-1 Backtest Live — Stage B Agent Validation"
+          echo "  Model: ${{ github.event.inputs.model }}"
+          echo "═══════════════════════════════════════════════════"
+          python nrs1_v3.py --backtest-live 2>&1 | tee backtest_output.txt
+          echo "══════════════════ DONE ══════════════════════════"
+        env:
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          GLM_MODEL: ${{ github.event.inputs.model }}
+
+      - name: Save results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-live-results
+          path: backtest_output.txt
+
+      - name: Commit results to repo
+        run: |
+          git config --local user.email "nrs1-bot@github.com"
+          git config --local user.name "NRS-1 Bot"
+          
+          # Save the output as a timestamped result file
+          TIMESTAMP=$(date -u '+%Y%m%d_%H%M%S')
+          mkdir -p results
+          cp backtest_output.txt "results/backtest_live_${TIMESTAMP}.txt"
+          
+          git add results/
+          git diff --staged --quiet || git commit -m \
+            "🧪 backtest-live result $(date -u '+%Y-%m-%d %H:%M UTC') | model=${{ github.event.inputs.model }}"
+          git push
