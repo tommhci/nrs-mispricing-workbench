@@ -1,0 +1,6 @@
+
+[RESEARCH] Querying GLM (glm-4.7-flash) with web search...
+  Ticker: NVDA  Topic: Blackwell GPU production ramp status
+
+  [RESEARCH] API error attempt 1: Error code: 429 - {'error': {'code': '1305', 'message': '该模型当前访问量过大，请您稍后再试'}}
+[RESEARCH] No result returned. Check ZHIPU_API_KEY and model availability.
