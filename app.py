@@ -171,7 +171,7 @@ def render_table_html(df_rows: list[dict]) -> str:
     """
     TD = "padding:7px 10px;font-size:0.72rem;color:#a1a1aa;border-bottom:1px solid #1a1a1c;font-family:'DM Mono',monospace;white-space:nowrap;"
 
-    headers = ["Date","Tkr","Gap","Label","N","R","M","Evid","Claim"]
+    headers = ["Date","Tkr","Gap","Label","N","R","M","Evid","Tier","Source","Claim"]
     thead   = "".join(
         f'<th style="text-align:left;padding:6px 10px;color:#3f3f46;font-size:0.65rem;'
         f'letter-spacing:.1em;border-bottom:1px solid #232326;font-weight:500;'
@@ -192,6 +192,12 @@ def render_table_html(df_rows: list[dict]) -> str:
         if hasattr(ts_val, "strftime"):
             ts_val = ts_val.strftime("%m-%d %H:%M")
 
+        tier_val = r.get("source_tier", "")
+        tier_colors = {1: "#16a34a", 2: "#f59e0b", 3: "#52525b"}
+        tier_color  = tier_colors.get(int(tier_val), "#52525b") if tier_val != "" else "#52525b"
+        tier_disp   = f"T{int(tier_val)}" if tier_val != "" else "—"
+        src_disp    = str(r.get("source_name", "—"))[:10]
+
         cells = "".join([
             f'<td style="{TD}">{ts_val}</td>',
             f'<td style="{TD};color:#f59e0b;font-weight:500;">{r.get("ticker","—")}</td>',
@@ -203,7 +209,9 @@ def render_table_html(df_rows: list[dict]) -> str:
             f'<td style="{TD}">{fmt(r.get("r_score"), 3)}</td>',
             f'<td style="{TD}">{fmt(r.get("m_implied"), 3)}</td>',
             f'<td style="{TD}">{r.get("evidence","—")}</td>',
-            f'<td style="{TD};color:#52525b;max-width:220px;overflow:hidden;'
+            f'<td style="{TD};color:{tier_color};font-weight:500;">{tier_disp}</td>',
+            f'<td style="{TD};color:#71717a;">{src_disp}</td>',
+            f'<td style="{TD};color:#52525b;max-width:200px;overflow:hidden;'
             f'text-overflow:ellipsis;">{claim_disp}</td>',
         ])
         tbody += f'<tr style="background:{bg};">{cells}</tr>'
@@ -239,7 +247,8 @@ with st.sidebar:
     st.markdown(f"""
     <div class="stat-row"><span class="stat-label">AUDIT ENTRIES</span><span class="stat-value">{ac}</span></div>
     <div class="stat-row"><span class="stat-label">HISTORY RECORDS</span><span class="stat-value">{len(df_all)}</span></div>
-    <div class="stat-row"><span class="stat-label">VERSION</span><span class="stat-value">NRS-1 v2</span></div>
+    <div class="stat-row"><span class="stat-label">VERSION</span><span class="stat-value ok">NRS-1 v3</span></div>
+    <div class="stat-row"><span class="stat-label">LLM</span><span class="stat-value">GLM (Zhipu AI)</span></div>
     """, unsafe_allow_html=True)
     st.markdown('<p style="font-family:DM Mono,monospace;font-size:0.62rem;color:#3f3f46;margin-top:1.5rem;">Not investment advice.</p>', unsafe_allow_html=True)
 
@@ -287,6 +296,19 @@ with col1:
         ("NR_gap",   latest.get("nr_gap",   0), "is-gap"),
         ("MR_gap",   latest.get("mr_gap",   0), "is-gap"),
     ]
+    # v3: evidence ceiling warning
+    ev_ceiling = latest.get("ev_ceiling", "")
+    ev_strength = latest.get("evidence", "")
+    if ev_ceiling and ev_strength and ev_ceiling != ev_strength:
+        src_tier = latest.get("source_tier", "")
+        st.markdown(
+            f'<p style="font-family:DM Mono,monospace;font-size:0.68rem;'
+            f'color:#ea580c;margin-bottom:0.6rem;">'
+            f'⚠ Evidence ceiling applied · Tier {src_tier} source · '
+            f'capped at <strong>{ev_strength}</strong></p>',
+            unsafe_allow_html=True,
+        )
+
     bars_html = '<div class="score-grid">'
     for key, val, css_class in scores:
         v   = float(val) if (val is not None and not (isinstance(val, float) and math.isnan(val))) else 0.0
@@ -304,11 +326,25 @@ with col2:
     evidence= latest.get("evidence", "—")
     mode    = latest.get("mode", "—")
 
+    # v3: source tier info
+    src_tier  = latest.get("source_tier", "")
+    src_name  = latest.get("source_name", "")
+    doc_type  = latest.get("doc_type", "")
+    tier_colors = {1: "#16a34a", 2: "#f59e0b", 3: "#52525b"}
+    tier_color  = tier_colors.get(int(src_tier), "#52525b") if src_tier != "" else "#52525b"
+    tier_label  = {1: "Tier 1 · Primary Filing",
+                   2: "Tier 2 · Expert Analysis",
+                   3: "Tier 3 · General Media"}.get(int(src_tier) if src_tier != "" else 0, "")
+    tier_badge  = (f'<div style="font-family:DM Mono,monospace;font-size:0.65rem;'
+                   f'color:{tier_color};margin-top:0.3rem;">'
+                   f'{src_name} · {tier_label} · {doc_type}</div>') if src_tier != "" else ""
+
     st.markdown(f"""
     <div class="claim-card">
       <div class="claim-ticker">{ticker}</div>
       <div class="claim-text">{claim}</div>
       <div class="claim-meta">{ts_str} · evidence: {evidence} · {mode}</div>
+      {tier_badge}
     </div>
     """, unsafe_allow_html=True)
 
@@ -392,8 +428,8 @@ if report:
 # ── FOOTER ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="disclaimer">
-NRS-1 v2 · Narrative-Reality Mispricing Workbench · Not investment advice ·
+NRS-1 v3 · Narrative-Reality Mispricing Workbench · Not investment advice ·
 All scores experimental and uncalibrated · Gap Index labels are analytical
-classifications, not trading signals.
+classifications, not trading signals · LLM: GLM (Zhipu AI)
 </div>
 """, unsafe_allow_html=True)
