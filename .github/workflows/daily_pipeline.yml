@@ -1,14 +1,29 @@
-name: NRS-1 v3 Daily Pipeline
+name: NRS-1 v3 Pipeline
+
+# ── SCHEDULE RATIONALE ────────────────────────────────────────────────────────
+# Two runs on weekdays only. EDGAR files 8-Ks on trading days; weekend runs
+# find no Tier 1/2 sources and produce stub-only records.
+#
+# UTC times are fixed — GitHub Actions does NOT auto-adjust for daylight saving.
+#
+# Run 1  |  14:00 UTC  |  10:00am EDT (summer) / 09:00am EST (winter)
+#        |             |  22:00 CST (Beijing prev. day) / 07:00am PDT (Silicon Valley)
+#        |  Captures:  |  Overnight Asian AI/tech news, pre-market US EDGAR 8-Ks,
+#        |             |  first 30 min of US market reaction.
+#
+# Run 2  |  22:00 UTC  |  06:00pm EDT (summer) / 05:00pm EST (winter)
+#        |             |  06:00am CST next day (Beijing) / 03:00pm PDT (Silicon Valley)
+#        |  Captures:  |  After-close EDGAR 8-Ks (earnings calls typically 4:30pm ET),
+#        |             |  European market close, Asia next-day pre-open.
+#
+# DST offset: +/-1 hour in winter vs summer. Acceptable — no special handling.
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    # Runs at 12:00 UTC daily (market hours context)
-    # UTC+8 (China/Singapore): 12:00 UTC = 20:00 local
-    # UTC-5 (Eastern US):      12:00 UTC = 07:00 local
-    - cron: '0 12 * * *'
-
-  # Manual trigger from GitHub Actions tab
-  workflow_dispatch:
+    - cron: '0 14 * * 1-5'   # Run 1: ~10am ET, weekdays
+    - cron: '0 22 * * 1-5'   # Run 2: ~6pm ET, weekdays
+  workflow_dispatch:           # Manual trigger from GitHub Actions tab
 
 jobs:
   run-pipeline:
@@ -27,14 +42,12 @@ jobs:
         run: pip install openai requests yfinance pandas
 
       - name: Run NRS-1 v3 pipeline
-        # --stub: uses hardcoded data (no API key needed for testing)
-        # Remove --stub once ZHIPU_API_KEY is set in repo secrets
+        # Remove --stub once ZHIPU_API_KEY is set in repo Secrets to enable live mode.
+        # Live mode: python nrs1_v3.py
         run: python nrs1_v3.py --stub
         env:
-          # Set in: GitHub repo → Settings → Secrets → Actions → New repository secret
-          # Name: ZHIPU_API_KEY, Value: <your key from open.bigmodel.cn>
-          # Then remove --stub from the run command above to enable live mode
-          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          ZHIPU_API_KEY:      ${{ secrets.ZHIPU_API_KEY }}
+          GLM_MODEL:          ${{ secrets.GLM_MODEL }}
           GMAIL_SENDER:       ${{ secrets.GMAIL_SENDER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           GMAIL_RECIPIENT:    ${{ secrets.GMAIL_RECIPIENT }}
@@ -45,5 +58,5 @@ jobs:
           git config --local user.name "NRS-1 v3 Bot"
           git add nrs1_history.jsonl nrs1_report.md nrs1_audit.jsonl
           git diff --staged --quiet || git commit -m \
-            "🤖 NRS-1 v3 $(date -u '+%Y-%m-%d %H:%M UTC')"
+            "robot NRS-1 $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push

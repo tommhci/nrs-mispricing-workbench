@@ -86,8 +86,15 @@ You have access to a web search tool. Use it to find:
 3. Expert technical commentary from sources like SemiAnalysis, Epoch AI, IEEE
 4. Historical analogues of similar claims
 
-After researching, produce a structured JSON verdict with EXACTLY these fields:
+OUTPUT CONTRACT (critical for unattended operation):
+Your ENTIRE response must be a single valid JSON object and NOTHING else.
+Do NOT write any reasoning, narration, or ReAct trace outside the JSON.
+Your chain of thought goes INSIDE the "reasoning" field below — this keeps the
+whole output machine-parseable while preserving your analytical process.
+
+Produce EXACTLY these fields:
 {
+  "reasoning": "<your step-by-step analysis: what you searched, what you found, how you weighed conflicting evidence. Keep it inside this string field.>",
   "claim": "<the specific claim or narrative being evaluated>",
   "narrative_direction": "bullish|bearish|neutral",
   "evidence_summary": "<2-3 sentences: what did you actually find?>",
@@ -107,9 +114,16 @@ CRITICAL RULES:
 - Only claim evidence_strength='strong' if you found primary SEC/earnings/
   technical paper sources. Media summaries = 'weak' at best.
 - feasibility_score - constraint_penalty must be >= 0
-- Return ONLY the JSON object. No markdown fences. No explanation outside JSON.
-- If web search returns no relevant results: evidence_strength='insufficient',
-  verdict='INSUFFICIENT_EVIDENCE'"""
+- Return ONLY the JSON object. No markdown fences. No text before or after it.
+- Do NOT fabricate sources or quotes. If you did not find a source, do not list it.
+- If conflicting evidence cannot be reconciled, state the divergence in "reasoning"
+  and lower "confidence" — do NOT invent a resolution.
+
+FAILURE-MODE HANDLING (unattended environment):
+- If web search returns no relevant results: set evidence_strength='insufficient',
+  verdict='INSUFFICIENT_EVIDENCE', confidence='low'. Do NOT guess.
+- If you are uncertain whether search worked: report what you actually have and
+  mark evidence_strength conservatively. Never claim certainty you do not have."""
 
 
 
@@ -155,68 +169,79 @@ def research(ticker: str, topic: str,
         f"Focus on engineering constraints, supply chain, and primary source evidence."
     )
 
-    # Z.AI web_search tool (Web Search in Chat mode)
-    # Source: docs.z.ai/guides/tools/web-search
-    # The model will autonomously decide when to search and what to search for.
-    # Fallback: if web_search tool is not available, the model will use its
-    # training knowledge (mark evidence_strength accordingly).
+    # Z.AI web_search tool (Web Search in Chat mode).
+    # NOTE: exact field name is INSUFFICIENT EVIDENCE from official docs
+    # (docs.z.ai pages did not render during verification). We use the most
+    # commonly documented field and DEGRADE GRACEFULLY if the API rejects it:
+    # on any tool-related error we retry WITHOUT tools and mark the result's
+    # evidence conservatively. This is more robust than betting on one schema.
     tools = [
         {
             "type": "web_search",
             "web_search": {
-                "search_enable": True,
-                # Not forcing a query — let GLM decide what to search for
-                # based on the user prompt. This is more autonomous.
+                "enable": True,
             }
         }
     ]
 
+    def _call(with_tools: bool):
+        kwargs = dict(
+            model=GLM_MODEL, max_tokens=1024, temperature=0.0,
+            messages=[
+                {"role": "system", "content": RESEARCH_SYSTEM_PROMPT},
+                {"role": "user",   "content": user_prompt},
+            ],
+        )
+        if with_tools:
+            kwargs["tools"] = tools
+        return client.chat.completions.create(**kwargs)
+
+    def _parse(raw):
+        if not raw:
+            return None
+        raw = raw.strip().removeprefix("```json").removeprefix("```")
+        raw = raw.removesuffix("```").strip()
+        return json.loads(raw)
+
     runs = []
+    searched = True   # track whether web_search was actually available
     for attempt in range(max(1, n_runs)):
         try:
-            response = client.chat.completions.create(
-                model=GLM_MODEL,
-                max_tokens=1024,
-                temperature=0.0,
-                messages=[
-                    {"role": "system",  "content": RESEARCH_SYSTEM_PROMPT},
-                    {"role": "user",    "content": user_prompt},
-                ],
-                tools=tools,
-            )
+            try:
+                response = _call(with_tools=True)
+            except Exception as tool_err:
+                # Generalized tool degradation: ANY tool/param rejection →
+                # retry without tools rather than crash the pipeline.
+                if any(w in str(tool_err).lower()
+                       for w in ("tool", "function", "param", "web_search", "schema")):
+                    print(f"  [RESEARCH] Tool call rejected ({tool_err}). "
+                          f"Degrading to no-search mode.")
+                    searched = False
+                    response = _call(with_tools=False)
+                else:
+                    raise
+
             raw = response.choices[0].message.content
             if raw is None:
-                # Model made tool calls but gave no final content — retry
-                # with tool results if available
-                print(f"  [RESEARCH] Attempt {attempt+1}: model used tool, "
-                      f"no content in response. Trying without tools...")
-                response2 = client.chat.completions.create(
-                    model=GLM_MODEL,
-                    max_tokens=1024,
-                    temperature=0.0,
-                    messages=[
-                        {"role": "system", "content": RESEARCH_SYSTEM_PROMPT},
-                        {"role": "user",   "content": user_prompt},
-                    ],
-                )
-                raw = response2.choices[0].message.content
+                # Model used tool but returned no final text — re-ask without tools
+                print(f"  [RESEARCH] Attempt {attempt+1}: tool used, no content. Retrying.")
+                response = _call(with_tools=False)
+                raw = response.choices[0].message.content
 
-            if not raw:
+            result = _parse(raw)
+            if result is None:
                 continue
-
-            raw = raw.strip().removeprefix("```json").removeprefix("```")
-            raw = raw.removesuffix("```").strip()
-            result = json.loads(raw)
+            # If we had to degrade, cap evidence so we never overclaim
+            if not searched and result.get("evidence_strength") in ("strong", "moderate"):
+                result["evidence_strength"] = "weak"
+                result["reasoning"] = ("[NO WEB SEARCH — model used training "
+                                       "knowledge only] ") + str(result.get("reasoning", ""))
             runs.append(result)
 
         except json.JSONDecodeError as e:
             print(f"  [RESEARCH] JSON parse failed attempt {attempt+1}: {e}")
         except Exception as e:
             print(f"  [RESEARCH] API error attempt {attempt+1}: {e}")
-            # Check if web_search tool is not supported on this model/tier
-            if "tool" in str(e).lower() or "function" in str(e).lower():
-                print("  [RESEARCH] Web search tool may not be available. "
-                      "Check docs.z.ai for current tool API format.")
 
     if not runs:
         return None
