@@ -1,25 +1,29 @@
 name: NRS-1 Backtest Live (Stage B)
 
 # ── PURPOSE ─────────────────────────────────────────────────────────────────────
-# One-click validation: tests if GLM can produce calibrated feasibility scores
-# from real EDGAR documents vs hand-verified oracle values.
+# One-click validation: tests if GLM produces calibrated feasibility scores from
+# real EDGAR documents vs hand-verified oracle values.
 #
 # Result: MAE (Mean Absolute Error) of feasibility_score
-#   ≤ 0.15  →  Signal meaningful for production use
-#   0.15-0.30 → Directional only, noisy
-#   ≥ 0.30  →  Scores unreliable — fix agent before adding features
+#   <= 0.15  ->  Signal meaningful for production use
+#   0.15-0.30 -> Directional only, noisy
+#   >= 0.30  ->  Scores unreliable; fix agent before adding features
 #
-# HOW TO RUN:
-#   GitHub repo → Actions tab → "NRS-1 Backtest Live" → Run workflow
+# HOW TO RUN: repo -> Actions -> "NRS-1 Backtest Live" -> Run workflow
 # ────────────────────────────────────────────────────────────────────────────────
 
 on:
   workflow_dispatch:
     inputs:
       model:
-        description: 'GLM model to test (default: glm-4.7-flash)'
+        description: 'GLM model to test'
         required: false
         default: 'glm-4.7-flash'
+
+# FIX (403): default GITHUB_TOKEN is read-only; grant write so results can commit.
+# Source: docs.github.com/en/actions/security-for-github-actions/automatic-token-authentication
+permissions:
+  contents: write
 
 jobs:
   backtest-live:
@@ -38,36 +42,76 @@ jobs:
       - name: Install dependencies
         run: pip install openai requests yfinance pandas
 
-      - name: Run --backtest-live
-        id: backtest
+      # ── PREFLIGHT 1: confirm the command exists (guards against partial merges)
+      - name: Preflight — verify --backtest-live exists
         run: |
-          echo "═══════════════════════════════════════════════════"
-          echo "  NRS-1 Backtest Live — Stage B Agent Validation"
-          echo "  Model: ${{ github.event.inputs.model }}"
-          echo "═══════════════════════════════════════════════════"
-          python nrs1_v3.py --backtest-live 2>&1 | tee backtest_output.txt
-          echo "══════════════════ DONE ══════════════════════════"
+          if ! python nrs1_v3.py --help 2>/dev/null | grep -q "backtest-live"; then
+            echo "::error::--backtest-live not found in nrs1_v3.py. Merge PR #6 first."
+            exit 1
+          fi
+          echo "OK: --backtest-live command is present."
+
+      # ── PREFLIGHT 2: confirm the secret actually reached the runner (no echo!)
+      - name: Preflight — verify ZHIPU_API_KEY secret
+        env:
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        run: |
+          if [ -z "$ZHIPU_API_KEY" ]; then
+            echo "::error::ZHIPU_API_KEY is EMPTY in this job."
+            echo "Checklist:"
+            echo "  1. Settings -> Secrets and variables -> Actions -> Repository secrets"
+            echo "  2. Secret name must be EXACTLY: ZHIPU_API_KEY (case-sensitive, no spaces)"
+            echo "  3. It must be a REPOSITORY secret, not an Environment secret"
+            echo "     (unless this job declares that environment)."
+            exit 1
+          fi
+          echo "OK: ZHIPU_API_KEY is present (length: ${#ZHIPU_API_KEY} chars)."
+
+      # ── PREFLIGHT 3: confirm GLM connectivity before the full backtest
+      - name: Preflight — GLM connectivity (--test-llm)
         env:
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
           GLM_MODEL: ${{ github.event.inputs.model }}
+        run: |
+          set -o pipefail
+          python nrs1_v3.py --test-llm 2>&1 | tee llm_check.txt || \
+            echo "::warning::--test-llm returned non-zero; the model/key may be misconfigured."
 
-      - name: Save results as artifact
+      # ── MAIN: run the backtest. pipefail makes python's exit code authoritative.
+      - name: Run --backtest-live
+        env:
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          GLM_MODEL: ${{ github.event.inputs.model }}
+        run: |
+          set -o pipefail
+          python nrs1_v3.py --backtest-live 2>&1 | tee backtest_output.txt
+
+      # ── Surface the result directly in the log (no need to download artifact)
+      - name: Show result in log
+        if: always()
+        run: |
+          echo "════════════════ BACKTEST-LIVE OUTPUT ════════════════"
+          cat backtest_output.txt 2>/dev/null || echo "(no output produced)"
+          echo "═══════════════════════════════════════════════════════"
+
+      - name: Upload result artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: backtest-live-results
           path: backtest_output.txt
 
+      # ── Commit results. Non-fatal: a push failure must never hide the result.
       - name: Commit results to repo
+        if: always()
+        continue-on-error: true
         run: |
           git config --local user.email "nrs1-bot@github.com"
           git config --local user.name "NRS-1 Bot"
-          
-          # Save the output as a timestamped result file
           TIMESTAMP=$(date -u '+%Y%m%d_%H%M%S')
           mkdir -p results
-          cp backtest_output.txt "results/backtest_live_${TIMESTAMP}.txt"
-          
-          git add results/
+          cp backtest_output.txt "results/backtest_live_${TIMESTAMP}.txt" 2>/dev/null || true
+          git add results/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m \
-            "🧪 backtest-live result $(date -u '+%Y-%m-%d %H:%M UTC') | model=${{ github.event.inputs.model }}"
-          git push
+            "backtest-live result $(date -u '+%Y-%m-%d %H:%M UTC') | model=${{ github.event.inputs.model }}"
+          git push || echo "::warning::Could not push results (check workflow permissions). Result is still in the log + artifact above."
