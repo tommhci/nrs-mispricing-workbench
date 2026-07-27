@@ -1,76 +1,88 @@
-# NRS-1 Logic Hedge Report
-**Session:** NRS1-20260529-114043 | **Mode:** live  
-**Generated:** 2026-05-29 15:41 UTC  
+# NRS-1 v3 Logic Hedge Report
+**Session:** `NRS3-20260727-160956` | **Mode:** `stub`  
+**Generated:** 2026-07-27 16:09 UTC  
 
 > **DISCLAIMER:** This report is a logic-consistency analysis only.
 > It does not constitute investment advice or a recommendation to buy
 > or sell any security. All scores are experimental and uncalibrated.
 
 ---
-## 1. Narrative Under Analysis
-**Claim:** Company claims next-gen AI chip achieves 10x compute efficiency per watt, volume shipments Q1 2027.  
-**Source:** https://example.com/stub  
-**Sentiment:** `1.0` | **Propagation:** `1.0` | **Novelty:** `first_report` | **Certainty:** `moderate`  
+## 1. Source Document
+**Source:** SEC EDGAR (stub) · **Tier 1 — Primary Filing** · `8K`  
+**URL:** https://example.com/stub-8k  
 
 ---
-## 2. Engineering Reality Assessment
-**Technical Change:** 10x compute efficiency per watt via 3nm AI silicon  
-**Feasibility Score:** `0.35` | **Constraint Penalty:** `0.3` | **Evidence:** `weak`  
-**Hardware Constraint:** HBM3e supply constrained; 3nm yields not at volume  
-**Supply Chain Risk:** Single-source HBM3e; TSMC 3nm shared with OEMs through 2027  
+## 2. Narrative Under Analysis
+**Claim:** NVIDIA Blackwell GPU volume production commences Q1 2027, with CoWoS packaging and HBM3e supply as primary constraints.  
+**Verbatim Quote:** *"initial system deliveries to hyperscaler customers beginning Q1 2027, subject to CoWoS packaging capacity constraints"*  
+**Sentiment:** `0.5` | **Propagation:** `1.0` | **Novelty:** `first_report` | **Certainty:** `moderate`  
+
+---
+## 3. Engineering Reality Assessment
+**Technical Change:** Blackwell GPU volume production at TSMC N4P with CoWoS packaging  
+**Feasibility Score:** `0.55` | **Constraint Penalty:** `0.3` | **Evidence:** `moderate`  *(evidence ceiling applied: strong → moderate)*  
+**Hardware Constraint:** CoWoS advanced packaging throughput at TSMC  
+**Supply Chain Risk:** HBM3e single-source risk; packaging shared with AMD MI400  
+**Primary Constraint:** CoWoS packaging capacity  
 
 **Unresolved Constraints:**
-- `manufacturing_yield_unproven`
-- `supply_chain_single_source`
-- `thermal_management_unsolved`
+- `CoWoS packaging capacity limited through H2 2026`
+- `HBM3e supply constrained by SK Hynix / Micron ramp`
+- `N4P yield at volume not publicly verified`
+
+**Historical Analogues:**
+- NVDA H100 CoWoS shortage 2023
+- NVDA Hopper delay 2022
 
 ---
-## 3. Market Data
-**Ticker:** NVDA | **Event Date:** 2026-05-29  
-**5-Day Return:** unavailable | **Data Quality:** `unavailable`  
+## 4. Market Data
+**Ticker:** NVDA | **Event Date:** 2026-07-27  
+**5-Day Return:** +8.0% | **Data Quality:** `ok`  
 
 ---
-## 4. Gap Index
+## 5. Gap Index
 
-| Metric | Value |
-|--------|-------|
-| N_score (Narrative) | `1.0000` |
-| R_score (Reality)   | `0.0980` |
-| M_implied (Market)  | `N/A` |
-| NR_gap              | `0.9020` |
-| MR_gap              | `N/A` |
-| **Gap Index**       | **`0.9020`** |
-| **Gap Label**       | **`STRONG_MISMATCH`** |
+| Metric          | Value |
+|-----------------|-------|
+| N_score (Narrative) | `0.7500` |
+| R_score (Reality)   | `0.2695` |
+| M_implied (Market)  | `0.6900` |
+| NR_gap              | `0.4805` |
+| MR_gap              | `0.4205` |
+| **Gap Index**       | **`0.4505`** |
+| **Gap Label**       | **`MODERATE_MISMATCH`** |
 
 **Calculation trace:**
-- N_score: 1.0×1.0×1.0 → 1.0000
-- R_score: 0.35×(1−0.3)×0.4 = 0.0980
-- NR_gap: |1.0000−0.0980| = 0.9020
-- M_implied: unavailable
-- GapIndex: 0.902000
+- N_score: 0.5×1.0×1.0 → 0.7500
+- R_score: 0.55×(1−0.3)×0.7 = 0.2695
+- NR_gap: |0.7500−0.2695| = 0.4805
+- M_implied: sigmoid(0.08)=0.6900
+- MR_gap: 0.4205
+- GapIndex: 0.450487
 
 ---
-## 5. Synthesis
+## 6. Synthesis
 
 **Narrative Summary**  
-Market narrative positions a 10x compute efficiency gain as achievable within 12 months, implying rapid margin expansion and competitive displacement of incumbent hardware vendors.
+NVIDIA's Blackwell production announcement frames volume delivery as imminent, implying rapid hyperscaler deployment and accelerated data center capital expenditure through 2027.
 
 **Reality Summary**  
-Engineering evidence is weak: the claim relies on press release language with no independent benchmark, unresolved HBM3e supply constraints, and undemonstrated thermal management at claimed throughput levels.
+Engineering evidence is moderate: the filing confirms production commencement but explicitly flags CoWoS packaging and HBM3e supply as binding constraints, suggesting the delivery timeline carries material execution risk.
 
 **Gap Interpretation**  
-Gap Index = 0.9020 (STRONG_MISMATCH). N_score=1.000 significantly exceeds R_score=0.098, driven by weak evidence and three unresolved engineering constraints. Market pricing (M=N/A) has absorbed narrative optimism ahead of engineering verification.
+Gap Index = 0.4505 (MODERATE_MISMATCH). N_score=0.750 moderately exceeds R_score=0.270. The narrative emphasises production commencement while understating the packaging and memory constraints that govern actual shipment volumes. Market pricing (M=0.69) has partially absorbed the announcement.
 
 **Key Uncertainties**
-- No third-party benchmark for the claimed 10x efficiency.
-- HBM3e supply ramp timeline not publicly disclosed.
-- 3nm yield data proprietary and unverifiable.
+- CoWoS capacity expansion timeline at TSMC not publicly committed.
+- HBM3e supply allocation between NVDA and AMD not disclosed.
+- N4P yield rate at Blackwell volume not independently verified.
+- Hyperscaler customer acceptance testing timelines unknown.
 
 **Open Questions**
-- What workload/benchmark defines the 10x comparison?
-- Has any hyperscaler partner independently validated the claim?
-- What is the production volume commitment for Q1 2027?
+- What volume constitutes 'commencement' — engineering samples or full ramp?
+- Has any hyperscaler publicly confirmed Q1 2027 Blackwell deployment?
+- What is TSMC's CoWoS capacity commitment specifically for NVDA?
 
 ---
 *Audit trail: `nrs1_audit.jsonl`*  
-*NRS-1 v2 — Not Investment Advice*
+*NRS-1 v3 — Not Investment Advice*
