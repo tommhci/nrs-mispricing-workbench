@@ -1,8 +1,10 @@
 venv/
+.venv/
 __pycache__/
 .pytest_cache/
 *.pyc
 .env
+~$*.docx
 
 # SQLite DB — auto-populated at runtime, not committed
 nrs1_data.db

@@ -1,9 +1,9 @@
 """
 NRS-1 v3 — Narrative-Reality Mispricing Workbench
 ==================================================
-Full reconstruction from v2. Key changes:
-  - LLM: Anthropic → GLM (Zhipu AI, OpenAI-compatible, free tokens)
-  - Sources: RSS headlines → Tiered document fetcher
+Submission version:
+  - LLM: GLM/Zhipu AI (OpenAI-compatible API)
+  - Sources: tiered document fetcher
       Tier 1: SEC EDGAR 8-K/10-Q (primary filings, free API)
       Tier 2: Expert analysis RSS (SemiAnalysis, FabricatedKnowledge, Epoch AI)
       Tier 3: General media RSS (v2 feeds, demoted, headline-only)
@@ -12,8 +12,8 @@ Full reconstruction from v2. Key changes:
   - Gap Index formula: UNCHANGED (fully backward compatible)
 
 SETUP:
-  pip install openai requests yfinance pandas streamlit plotly
-  export ZHIPU_API_KEY=<from open.bigmodel.cn>
+  pip install -r requirements.txt
+  set ZHIPU_API_KEY=<your Zhipu API key>
 
 RUN:
   python nrs1_v3.py          -- live mode (GLM + tiered sources)
@@ -38,19 +38,21 @@ from typing import Optional
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except AttributeError:
+    pass
+
 
 # ════════════════════════════════════════════════════════════════
 #  ★  CONFIG
 # ════════════════════════════════════════════════════════════════
 
-# GLM (Zhipu AI) — replaces Anthropic
-ZHIPU_API_KEY  = os.environ.get("ZHIPU_API_KEY", "")
-GLM_BASE_URL   = "https://open.bigmodel.cn/api/paas/v4/"
-# Recommendation (June 2026): "glm-4.7-flash" is free on Z.ai API and
-# outperforms glm-4.5 on most benchmarks (codersera.com Jan 2026;
-# llm-stats.com). Override with env var GLM_MODEL=glm-4.7-flash.
-# Default stays "glm-4.5" because that is what Tom's free-tier tokens cover.
-GLM_MODEL      = os.environ.get("GLM_MODEL", "glm-4.5")
+# GLM/Zhipu uses an OpenAI-compatible chat completions API.
+ZHIPU_API_KEY = os.environ.get("ZHIPU_API_KEY", "")
+GLM_BASE_URL  = "https://open.bigmodel.cn/api/paas/v4/"
+GLM_MODEL     = os.environ.get("GLM_MODEL", "glm-4.5")
 
 # Email (unchanged from v2)
 GMAIL_SENDER       = os.environ.get("GMAIL_SENDER", "")
@@ -646,7 +648,7 @@ Rules:
 """
 
 
-# ── GLM client (replaces Anthropic) ──────────────────────────────
+# ── GLM client ──────────────────────────────────────────────────
 
 def call_llm(system_prompt: str, user_content: str,
              model: str = GLM_MODEL) -> Optional[dict]:
@@ -654,9 +656,6 @@ def call_llm(system_prompt: str, user_content: str,
     Calls GLM via OpenAI-compatible endpoint.
     Returns parsed JSON dict, or None on any failure.
     Retries once on JSON parse error.
-
-    Migration note: This is a drop-in replacement for the Anthropic
-    call_llm() in nrs1_v2.py. Caller interface is identical.
     """
     if not ZHIPU_API_KEY:
         print("  [LLM] ZHIPU_API_KEY not set — returning None (use --stub)")
@@ -1192,13 +1191,13 @@ def write_report(session_id, narrative, reality, market, gap, synthesis, mode="l
                   3: "Tier 3 — General Media"}.get(narrative.source_tier, "Unknown")
     ceiling_note = ""
     if reality.evidence_ceiling != reality.evidence_strength:
-        ceiling_note = (f"  *(evidence ceiling applied: "
+        ceiling_note = (f" *(evidence ceiling applied: "
                         f"{reality.evidence_ceiling} → {reality.evidence_strength})*")
 
     lines = [
         "# NRS-1 v3 Logic Hedge Report",
-        f"**Session:** `{session_id}` | **Mode:** `{mode}`  ",
-        f"**Generated:** {today.strftime('%Y-%m-%d %H:%M UTC')}  ",
+        f"**Session:** `{session_id}` | **Mode:** `{mode}`",
+        f"**Generated:** {today.strftime('%Y-%m-%d %H:%M UTC')}",
         "",
         "> **DISCLAIMER:** This report is a logic-consistency analysis only.",
         "> It does not constitute investment advice or a recommendation to buy",
@@ -1206,27 +1205,27 @@ def write_report(session_id, narrative, reality, market, gap, synthesis, mode="l
         "",
         "---",
         "## 1. Source Document",
-        f"**Source:** {narrative.source_name} · **{tier_label}** · `{narrative.doc_type}`  ",
-        f"**URL:** {narrative.source_url}  ",
+        f"**Source:** {narrative.source_name} · **{tier_label}** · `{narrative.doc_type}`",
+        f"**URL:** {narrative.source_url}",
         "",
         "---",
         "## 2. Narrative Under Analysis",
-        f"**Claim:** {narrative.claim}  ",
-        f"**Verbatim Quote:** *\"{narrative.verbatim_quote}\"*  ",
+        f"**Claim:** {narrative.claim}",
+        f"**Verbatim Quote:** *\"{narrative.verbatim_quote}\"*",
         f"**Sentiment:** `{narrative.sentiment_polarity}` | "
         f"**Propagation:** `{narrative.propagation}` | "
         f"**Novelty:** `{narrative.novelty}` | "
-        f"**Certainty:** `{narrative.certainty}`  ",
+        f"**Certainty:** `{narrative.certainty}`",
         "",
         "---",
         "## 3. Engineering Reality Assessment",
-        f"**Technical Change:** {reality.technical_change}  ",
+        f"**Technical Change:** {reality.technical_change}",
         f"**Feasibility Score:** `{reality.feasibility_score}` | "
         f"**Constraint Penalty:** `{reality.constraint_penalty}` | "
-        f"**Evidence:** `{reality.evidence_strength}`{ceiling_note}  ",
-        f"**Hardware Constraint:** {reality.hardware_constraint}  ",
-        f"**Supply Chain Risk:** {reality.supply_chain_risk}  ",
-        f"**Primary Constraint:** {reality.primary_constraint}  ",
+        f"**Evidence:** `{reality.evidence_strength}`{ceiling_note}",
+        f"**Hardware Constraint:** {reality.hardware_constraint}",
+        f"**Supply Chain Risk:** {reality.supply_chain_risk}",
+        f"**Primary Constraint:** {reality.primary_constraint}",
         "",
         "**Unresolved Constraints:**",
     ] + ([f"- `{c}`" for c in reality.open_constraints]
@@ -1238,8 +1237,8 @@ def write_report(session_id, narrative, reality, market, gap, synthesis, mode="l
         "",
         "---",
         "## 4. Market Data",
-        f"**Ticker:** {market.ticker} | **Event Date:** {market.event_date}  ",
-        f"**5-Day Return:** {ret_str} | **Data Quality:** `{market.data_quality}`  ",
+        f"**Ticker:** {market.ticker} | **Event Date:** {market.event_date}",
+        f"**5-Day Return:** {ret_str} | **Data Quality:** `{market.data_quality}`",
         "",
         "---",
         "## 5. Gap Index",
@@ -1260,13 +1259,13 @@ def write_report(session_id, narrative, reality, market, gap, synthesis, mode="l
         "---",
         "## 6. Synthesis",
         "",
-        "**Narrative Summary**  ",
+        "**Narrative Summary**",
         synthesis["narrative_summary"],
         "",
-        "**Reality Summary**  ",
+        "**Reality Summary**",
         synthesis["reality_summary"],
         "",
-        "**Gap Interpretation**  ",
+        "**Gap Interpretation**",
         synthesis["gap_interpretation"],
         "",
         "**Key Uncertainties**",
@@ -1276,7 +1275,7 @@ def write_report(session_id, narrative, reality, market, gap, synthesis, mode="l
     ] + [f"- {q}" for q in synthesis["open_questions"]] + [
         "",
         "---",
-        f"*Audit trail: `{AUDIT_PATH}`*  ",
+        f"*Audit trail: `{AUDIT_PATH}`*",
         "*NRS-1 v3 — Not Investment Advice*",
     ]
 
@@ -1376,6 +1375,12 @@ def run_pipeline(mode: str = "stub") -> dict:
 
     audit(session_id, "INIT", "pipeline_start", detail={"mode": mode})
 
+    if mode == "live" and not ZHIPU_API_KEY:
+        msg = "ZHIPU_API_KEY is required for live mode"
+        print(f"  [CONFIG] {msg}. Use --stub for no-key verification.")
+        audit(session_id, "CONFIG", "blocked", reasons=[msg])
+        return {"status": "blocked", "gate": "config", "reasons": [msg]}
+
     # ── Stage 0: Source Acquisition ──────────────────────────────
     document = None
     if mode == "live":
@@ -1383,8 +1388,10 @@ def run_pipeline(mode: str = "stub") -> dict:
 
     if document is None:
         if mode == "live":
-            print("  [PIPELINE] Source acquisition failed — using stub")
-            audit(session_id, "SOURCE", "all_tiers_failed_using_stub")
+            msg = "live source acquisition failed"
+            print("  [PIPELINE] Source acquisition failed. Use --stub for sample-data verification.")
+            audit(session_id, "SOURCE", "blocked", reasons=[msg])
+            return {"status": "blocked", "gate": "source", "reasons": [msg]}
         document = stub_source()
 
     audit(session_id, "SOURCE", "document_acquired",
@@ -2253,8 +2260,8 @@ def run_backtest_live() -> dict:
     """
     if not ZHIPU_API_KEY:
         print("\n  [BACKTEST-LIVE] Requires ZHIPU_API_KEY.")
-        print("  Set it: export ZHIPU_API_KEY=<key from open.bigmodel.cn>")
-        print("  Optionally: export GLM_MODEL=glm-4.7-flash  (free, better than 4.5)")
+        print("  PowerShell: $env:ZHIPU_API_KEY='<your Zhipu API key>'")
+        print("  Optional:   $env:GLM_MODEL='glm-4.5'")
         print("  Then re-run: python nrs1_v3.py --backtest-live\n")
         return {"status": "no_key"}
 
@@ -2362,7 +2369,7 @@ Usage: python nrs1_v3.py [flag]
 
   (no flag)          Live mode: fetch real sources, call GLM, write report
   --stub             Stub mode: hardcoded data, no API key needed
-  --test             Run 38 unit tests
+  --test             Run built-in unit tests
   --backtest         Directional validation on 5 oracle historical cases
   --backtest-live    Stage B: test GLM on real EDGAR docs vs oracle [needs ZHIPU_API_KEY]
   --analyze          Formula sensitivity analysis (pure math, no data)
@@ -2372,7 +2379,7 @@ Usage: python nrs1_v3.py [flag]
 
 Environment variables:
   ZHIPU_API_KEY      Required for --backtest-live, --test-llm, live mode
-  GLM_MODEL          Override model (default: glm-4.5; try: glm-4.7-flash)
+  GLM_MODEL          Override model (default: glm-4.5)
   GMAIL_SENDER / GMAIL_APP_PASSWORD / GMAIL_RECIPIENT  — email dispatch
 """)
         sys.exit(0)

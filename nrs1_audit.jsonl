@@ -33,3 +33,89 @@
 {"ts": "2026-07-28T15:59:55.222237+00:00", "session_id": "NRS3-20260728-155955", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
 {"ts": "2026-07-28T15:59:55.222281+00:00", "session_id": "NRS3-20260728-155955", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
 {"ts": "2026-07-28T15:59:55.506606+00:00", "session_id": "NRS3-20260728-155955", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:22.603427+00:00", "session_id": "NRS3-20260728-152122", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:22.604703+00:00", "session_id": "NRS3-20260728-152122", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:22.605307+00:00", "session_id": "NRS3-20260728-152122", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:22.605791+00:00", "session_id": "NRS3-20260728-152122", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T15:21:22.606523+00:00", "session_id": "NRS3-20260728-152122", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:22.607153+00:00", "session_id": "NRS3-20260728-152122", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:22.607693+00:00", "session_id": "NRS3-20260728-152122", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:22.608235+00:00", "session_id": "NRS3-20260728-152122", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:22.798210+00:00", "session_id": "NRS3-20260728-152122", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:36.014388+00:00", "session_id": "NRS3-20260728-152136", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:36.015807+00:00", "session_id": "NRS3-20260728-152136", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:36.017130+00:00", "session_id": "NRS3-20260728-152136", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:36.028014+00:00", "session_id": "NRS3-20260728-152136", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T15:21:36.029737+00:00", "session_id": "NRS3-20260728-152136", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:36.033282+00:00", "session_id": "NRS3-20260728-152136", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:36.034450+00:00", "session_id": "NRS3-20260728-152136", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:36.036091+00:00", "session_id": "NRS3-20260728-152136", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:36.061877+00:00", "session_id": "NRS3-20260728-152136", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:52.288834+00:00", "session_id": "NRS3-20260728-152152", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:52.288834+00:00", "session_id": "NRS3-20260728-152152", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:52.291385+00:00", "session_id": "NRS3-20260728-152152", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:52.291385+00:00", "session_id": "NRS3-20260728-152152", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T15:21:52.291385+00:00", "session_id": "NRS3-20260728-152152", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:52.293343+00:00", "session_id": "NRS3-20260728-152152", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T15:21:52.293343+00:00", "session_id": "NRS3-20260728-152152", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:52.293343+00:00", "session_id": "NRS3-20260728-152152", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:21:56.688832+00:00", "session_id": "NRS3-20260728-152152", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:31:54.037219+00:00", "session_id": "NRS3-20260728-153154", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:31:54.038681+00:00", "session_id": "NRS3-20260728-153154", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:31:54.039517+00:00", "session_id": "NRS3-20260728-153154", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:31:54.040101+00:00", "session_id": "NRS3-20260728-153154", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T15:31:54.040873+00:00", "session_id": "NRS3-20260728-153154", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:31:54.041459+00:00", "session_id": "NRS3-20260728-153154", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T15:31:54.041950+00:00", "session_id": "NRS3-20260728-153154", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:31:54.042669+00:00", "session_id": "NRS3-20260728-153154", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:31:59.348096+00:00", "session_id": "NRS3-20260728-153154", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:34:05.350056+00:00", "session_id": "NRS3-20260728-153405", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "live"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:34:07.573447+00:00", "session_id": "NRS3-20260728-153405", "stage": "SOURCE", "event": "all_tiers_failed_using_stub", "detail": null, "gate_reasons": null}
+{"ts": "2026-07-28T15:34:07.574196+00:00", "session_id": "NRS3-20260728-153405", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:34:07.574609+00:00", "session_id": "NRS3-20260728-153405", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:34:07.574902+00:00", "session_id": "NRS3-20260728-153405", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T15:34:09.936049+00:00", "session_id": "NRS3-20260728-153405", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": ["WARN: no market data \u2014 MR_gap excluded from Gap Index"]}
+{"ts": "2026-07-28T15:34:09.936922+00:00", "session_id": "NRS3-20260728-153405", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.4805, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T15:34:09.937319+00:00", "session_id": "NRS3-20260728-153405", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:34:09.937647+00:00", "session_id": "NRS3-20260728-153405", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:34:09.986517+00:00", "session_id": "NRS3-20260728-153405", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.4805, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:35:00.116613+00:00", "session_id": "NRS3-20260728-153500", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:35:00.117655+00:00", "session_id": "NRS3-20260728-153500", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T15:35:00.118676+00:00", "session_id": "NRS3-20260728-153500", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:35:00.119602+00:00", "session_id": "NRS3-20260728-153500", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T15:35:00.120371+00:00", "session_id": "NRS3-20260728-153500", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:35:00.121273+00:00", "session_id": "NRS3-20260728-153500", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T15:35:00.122147+00:00", "session_id": "NRS3-20260728-153500", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:35:00.122924+00:00", "session_id": "NRS3-20260728-153500", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T15:35:01.400050+00:00", "session_id": "NRS3-20260728-153500", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T19:36:03.493971+00:00", "session_id": "NRS3-20260728-193603", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T19:36:03.494801+00:00", "session_id": "NRS3-20260728-193603", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T19:36:03.495448+00:00", "session_id": "NRS3-20260728-193603", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T19:36:03.496003+00:00", "session_id": "NRS3-20260728-193603", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T19:36:03.496579+00:00", "session_id": "NRS3-20260728-193603", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T19:36:03.497306+00:00", "session_id": "NRS3-20260728-193603", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T19:36:03.497889+00:00", "session_id": "NRS3-20260728-193603", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T19:36:03.498482+00:00", "session_id": "NRS3-20260728-193603", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T19:36:04.958118+00:00", "session_id": "NRS3-20260728-193603", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T19:36:58.231312+00:00", "session_id": "NRS3-20260728-193658", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "live"}, "gate_reasons": null}
+{"ts": "2026-07-28T19:36:58.232013+00:00", "session_id": "NRS3-20260728-193658", "stage": "CONFIG", "event": "blocked", "detail": null, "gate_reasons": ["ZHIPU_API_KEY is required for live mode"]}
+{"ts": "2026-07-28T20:17:54.637663+00:00", "session_id": "NRS3-20260728-201754", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T20:17:54.638871+00:00", "session_id": "NRS3-20260728-201754", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T20:17:54.640351+00:00", "session_id": "NRS3-20260728-201754", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:17:54.641862+00:00", "session_id": "NRS3-20260728-201754", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T20:17:54.642967+00:00", "session_id": "NRS3-20260728-201754", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:17:54.643807+00:00", "session_id": "NRS3-20260728-201754", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T20:17:54.645155+00:00", "session_id": "NRS3-20260728-201754", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:17:54.646616+00:00", "session_id": "NRS3-20260728-201754", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:17:54.666427+00:00", "session_id": "NRS3-20260728-201754", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "live"}, "gate_reasons": null}
+{"ts": "2026-07-28T20:17:54.667258+00:00", "session_id": "NRS3-20260728-201754", "stage": "CONFIG", "event": "blocked", "detail": null, "gate_reasons": ["ZHIPU_API_KEY is required for live mode"]}
+{"ts": "2026-07-28T20:17:55.872521+00:00", "session_id": "NRS3-20260728-201754", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-07-28T20:18:14.713806+00:00", "session_id": "NRS3-20260728-201814", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-07-28T20:18:14.714827+00:00", "session_id": "NRS3-20260728-201814", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-07-28T20:18:14.715815+00:00", "session_id": "NRS3-20260728-201814", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:18:14.716991+00:00", "session_id": "NRS3-20260728-201814", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-07-28T20:18:14.718085+00:00", "session_id": "NRS3-20260728-201814", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:18:14.718833+00:00", "session_id": "NRS3-20260728-201814", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-07-28T20:18:14.719679+00:00", "session_id": "NRS3-20260728-201814", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:18:14.720386+00:00", "session_id": "NRS3-20260728-201814", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-07-28T20:18:15.618482+00:00", "session_id": "NRS3-20260728-201814", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}

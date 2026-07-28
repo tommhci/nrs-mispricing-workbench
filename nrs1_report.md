@@ -1,6 +1,6 @@
 # NRS-1 v3 Logic Hedge Report
-**Session:** `NRS3-20260728-155955` | **Mode:** `stub`  
-**Generated:** 2026-07-28 15:59 UTC  
+**Session:** `NRS3-20260728-201814` | **Mode:** `stub`
+**Generated:** 2026-07-28 20:18 UTC
 
 > **DISCLAIMER:** This report is a logic-consistency analysis only.
 > It does not constitute investment advice or a recommendation to buy
@@ -8,22 +8,22 @@
 
 ---
 ## 1. Source Document
-**Source:** SEC EDGAR (stub) · **Tier 1 — Primary Filing** · `8K`  
-**URL:** https://example.com/stub-8k  
+**Source:** SEC EDGAR (stub) · **Tier 1 — Primary Filing** · `8K`
+**URL:** https://example.com/stub-8k
 
 ---
 ## 2. Narrative Under Analysis
-**Claim:** NVIDIA Blackwell GPU volume production commences Q1 2027, with CoWoS packaging and HBM3e supply as primary constraints.  
-**Verbatim Quote:** *"initial system deliveries to hyperscaler customers beginning Q1 2027, subject to CoWoS packaging capacity constraints"*  
-**Sentiment:** `0.5` | **Propagation:** `1.0` | **Novelty:** `first_report` | **Certainty:** `moderate`  
+**Claim:** NVIDIA Blackwell GPU volume production commences Q1 2027, with CoWoS packaging and HBM3e supply as primary constraints.
+**Verbatim Quote:** *"initial system deliveries to hyperscaler customers beginning Q1 2027, subject to CoWoS packaging capacity constraints"*
+**Sentiment:** `0.5` | **Propagation:** `1.0` | **Novelty:** `first_report` | **Certainty:** `moderate`
 
 ---
 ## 3. Engineering Reality Assessment
-**Technical Change:** Blackwell GPU volume production at TSMC N4P with CoWoS packaging  
-**Feasibility Score:** `0.55` | **Constraint Penalty:** `0.3` | **Evidence:** `moderate`  *(evidence ceiling applied: strong → moderate)*  
-**Hardware Constraint:** CoWoS advanced packaging throughput at TSMC  
-**Supply Chain Risk:** HBM3e single-source risk; packaging shared with AMD MI400  
-**Primary Constraint:** CoWoS packaging capacity  
+**Technical Change:** Blackwell GPU volume production at TSMC N4P with CoWoS packaging
+**Feasibility Score:** `0.55` | **Constraint Penalty:** `0.3` | **Evidence:** `moderate` *(evidence ceiling applied: strong → moderate)*
+**Hardware Constraint:** CoWoS advanced packaging throughput at TSMC
+**Supply Chain Risk:** HBM3e single-source risk; packaging shared with AMD MI400
+**Primary Constraint:** CoWoS packaging capacity
 
 **Unresolved Constraints:**
 - `CoWoS packaging capacity limited through H2 2026`
@@ -36,8 +36,8 @@
 
 ---
 ## 4. Market Data
-**Ticker:** NVDA | **Event Date:** 2026-07-28  
-**5-Day Return:** +8.0% | **Data Quality:** `ok`  
+**Ticker:** NVDA | **Event Date:** 2026-07-28
+**5-Day Return:** +8.0% | **Data Quality:** `ok`
 
 ---
 ## 5. Gap Index
@@ -84,5 +84,5 @@ Gap Index = 0.4505 (MODERATE_MISMATCH). N_score=0.750 moderately exceeds R_score
 - What is TSMC's CoWoS capacity commitment specifically for NVDA?
 
 ---
-*Audit trail: `nrs1_audit.jsonl`*  
+*Audit trail: `nrs1_audit.jsonl`*
 *NRS-1 v3 — Not Investment Advice*

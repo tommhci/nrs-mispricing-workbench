@@ -456,7 +456,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     st.markdown(
         '<p style="font-family:DM Mono,monospace;font-size:0.6rem;color:#3f3f46;'
-        'margin-top:1.2rem;">Not investment advice.</p>',
+        'margin-top:1.2rem;">Human review required.</p>',
         unsafe_allow_html=True)
 
 
@@ -729,8 +729,8 @@ with tab_an:
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="disclaimer">
-NRS-1 v3 · Not investment advice · All scores experimental and uncalibrated ·
-Gap Index labels are analytical classifications, not trading signals ·
-LLM: GLM (Zhipu AI) · Data: SQLite (migrated from nrs1_history.jsonl)
+NRS-1 v3 · AI-assisted analytical prototype ·
+Gap Index is an experimental analytical classification, not a prediction signal ·
+LLM: GLM (Zhipu AI) · Human-in-the-loop analysis
 </div>
 """, unsafe_allow_html=True)
