@@ -1,6 +1,6 @@
 # NRS-1 v3 Logic Hedge Report
-**Session:** `NRS3-20260728-201814` | **Mode:** `stub`
-**Generated:** 2026-07-28 20:18 UTC
+**Session:** `NRS3-20260728-224939` | **Mode:** `stub`
+**Generated:** 2026-07-28 22:49 UTC
 
 > **DISCLAIMER:** This report is a logic-consistency analysis only.
 > It does not constitute investment advice or a recommendation to buy
@@ -63,13 +63,13 @@
 ---
 ## 6. Synthesis
 
-**Narrative Summary**  
+**Narrative Summary**
 NVIDIA's Blackwell production announcement frames volume delivery as imminent, implying rapid hyperscaler deployment and accelerated data center capital expenditure through 2027.
 
-**Reality Summary**  
+**Reality Summary**
 Engineering evidence is moderate: the filing confirms production commencement but explicitly flags CoWoS packaging and HBM3e supply as binding constraints, suggesting the delivery timeline carries material execution risk.
 
-**Gap Interpretation**  
+**Gap Interpretation**
 Gap Index = 0.4505 (MODERATE_MISMATCH). N_score=0.750 moderately exceeds R_score=0.270. The narrative emphasises production commencement while understating the packaging and memory constraints that govern actual shipment volumes. Market pricing (M=0.69) has partially absorbed the announcement.
 
 **Key Uncertainties**
