@@ -1,6 +1,6 @@
 # NRS-1 v3 Logic Hedge Report
-**Session:** `NRS3-20260827-022101` | **Mode:** `stub`
-**Generated:** 2026-08-27 02:21 UTC
+**Session:** `NRS3-20260827-232506` | **Mode:** `stub`
+**Generated:** 2026-08-27 23:25 UTC
 
 > **DISCLAIMER:** This report is a logic-consistency analysis only.
 > It does not constitute investment advice or a recommendation to buy
