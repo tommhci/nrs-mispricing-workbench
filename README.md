@@ -1,8 +1,35 @@
-# NRS-1 - Narrative-Reality Mispricing Workbench
+# NRS-1 — Narrative-Reality Mispricing Workbench
 
-NRS-1 is a small AI agent for the HCI Worksheet 07 submission. It compares a public AI/semiconductor narrative with available engineering evidence and market context, then writes a report, history log, and Streamlit dashboard view.
+NRS-1 is a small autonomous agent that stress-tests a public
+AI/semiconductor narrative against available engineering evidence and
+market context. It runs a perception → reasoning → action pipeline
+through an LLM (GLM/Zhipu), passes outputs through validation gates,
+computes a "Gap Index" between narrative and reality, and emits an
+append-only audit trail, run history, a structured report, and a
+Streamlit dashboard.
 
-This is an academic prototype. It is not investment advice, and its scores are experimental and uncalibrated.
+Built as an academic prototype (HCI course project, now frozen).
+**It is not investment advice; its scores are experimental and
+uncalibrated.** What makes it worth reading is not the scoring — it is
+the discipline around it: every run is reproducible, logged, auditable,
+and wired into a governance control plane (protected paths, pre-commit
+enforcement, attach-time verification).
+
+## Highlights
+
+- **Append-only audit trail** (`nrs1_audit.jsonl`) — every agent decision
+  is recorded; nothing is silently overwritten.
+- **Run history + SQLite mirror** (`nrs1_history.jsonl` → `db.py`) —
+  dashboards and backtests query the same canonical log.
+- **CI workflows** (`.github/workflows/`) — scheduled pipeline and
+  historical backtest validation.
+- **Deterministic fallbacks** — stub mode runs the full pipeline with
+  zero API keys; missing yfinance/API keys degrade explicitly, never
+  silently.
+- **Governance surface** — the repo carries an
+  [ai-control-plane](https://github.com/tommhci/ai-control-plane)
+  attach: protected paths, ownership docs, and attach-time verification
+  (see `AGENTS.md`, `.control-plane/`).
 
 ## Quick Start
 
@@ -15,6 +42,10 @@ python nrs1_v3.py --stub
 python nrs1_v3.py --test
 streamlit run app.py
 ```
+
+> ⚠ `--stub` **overwrites** `nrs1_report.md` and appends to the audit /
+> history logs. The committed `nrs1_report.md` is a frozen submission
+> artifact — do not run pipeline modes against it casually.
 
 Live GLM/Zhipu mode requires an API key:
 
@@ -30,11 +61,11 @@ python nrs1_v3.py
 
 | Command | Purpose |
 |---|---|
-| `python nrs1_v3.py --stub` | Run the full pipeline with sample data and no API key |
-| `python nrs1_v3.py` | Run live mode with GLM and real source retrieval |
-| `python nrs1_v3.py --test` | Run built-in unit tests |
+| `python nrs1_v3.py --stub` | Full pipeline with sample data, no API key (**overwrites report + appends logs**) |
+| `python nrs1_v3.py` | Live mode with GLM and real source retrieval |
+| `python nrs1_v3.py --test` | Built-in unit tests |
 | `python nrs1_v3.py --test-llm` | Verify GLM API connectivity |
-| `python nrs1_v3.py --backtest` | Run historical formula validation |
+| `python nrs1_v3.py --backtest` | Historical formula validation |
 | `streamlit run app.py` | Open the dashboard |
 
 ## Architecture
@@ -43,18 +74,12 @@ python nrs1_v3.py
 Sources -> GLM LLM agents -> validation gates -> Gap Index -> report/history/dashboard
 ```
 
-- `nrs1_v3.py`: main pipeline, GLM calls, validation gates, scoring, built-in tests.
+- `nrs1_v3.py`: main pipeline, GLM calls, validation gates, scoring,
+  built-in tests.
 - `app.py`: Streamlit dashboard for the latest run and history.
 - `db.py`: SQLite query layer populated from `nrs1_history.jsonl`.
-- `nrs1_history.jsonl`: append-only run history.
-- `nrs1_report.md`: latest generated report.
-- `NRS1_v3_SPEC.md`: concise submission specification.
-
-## Submission Evidence
-
-Prepare four screenshots for the worksheet:
-
-1. Repository structure: proves the project has the expected runnable files.
-2. Agent running in terminal: proves the perception-reasoning-action pipeline executes.
-3. Streamlit dashboard: proves the result is visible in a human-review interface.
-4. Tests passing: proves deterministic scoring and failure-handling checks pass.
+- `nrs1_history.jsonl` / `nrs1_audit.jsonl`: append-only run history and
+  decision audit.
+- `nrs1_report.md`: latest generated report (currently a frozen
+  submission artifact).
+- `NRS1_v3_SPEC.md`: pipeline design specification.
