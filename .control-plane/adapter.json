@@ -1,0 +1,17 @@
+﻿{
+    "adapterId":  "nrs-mispricing-workbench",
+    "project":  "nrs-mispricing-workbench",
+    "displayName":  "nrs-mispricing-workbench",
+    "mode":  "client",
+    "controlPlaneRepo":  "C:\\Users\\1\\ai-control-plane",
+    "sharedAdapterPath":  "adapters/generic/adapter.json",
+    "canonicalSources":  [
+                             "README.md",
+                             "PROJECT_STATUS.md",
+                             "AGENTS.md",
+                             "AI_BOOTSTRAP.md"
+                         ],
+    "ownershipFile":  ".agents/ACTIVE_EDIT_OWNERSHIP.md",
+    "sessionLog":  ".agents/session_log.jsonl",
+    "effectivenessLog":  ".agents/effectiveness_log.jsonl"
+}
