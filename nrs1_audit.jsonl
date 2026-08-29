@@ -524,3 +524,12 @@
 {"ts": "2026-08-28T23:20:18.485135+00:00", "session_id": "NRS3-20260828-232018", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
 {"ts": "2026-08-28T23:20:18.485163+00:00", "session_id": "NRS3-20260828-232018", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
 {"ts": "2026-08-28T23:20:18.785489+00:00", "session_id": "NRS3-20260828-232018", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
+{"ts": "2026-08-29T03:24:25.285828+00:00", "session_id": "NRS3-20260829-032425", "stage": "INIT", "event": "pipeline_start", "detail": {"mode": "stub"}, "gate_reasons": null}
+{"ts": "2026-08-29T03:24:25.285934+00:00", "session_id": "NRS3-20260829-032425", "stage": "SOURCE", "event": "document_acquired", "detail": {"tier": 1, "source": "SEC EDGAR (stub)", "title": "NVIDIA 8-K: Blackwell architecture production ramp update"}, "gate_reasons": null}
+{"ts": "2026-08-29T03:24:25.285981+00:00", "session_id": "NRS3-20260829-032425", "stage": "GATE_1", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-08-29T03:24:25.286022+00:00", "session_id": "NRS3-20260829-032425", "stage": "GATE_2", "event": "passed", "detail": null, "gate_reasons": ["WARN: 3 open constraints", "INFO: evidence ceiling applied (strong \u2192 moderate)"]}
+{"ts": "2026-08-29T03:24:25.286068+00:00", "session_id": "NRS3-20260829-032425", "stage": "GATE_3", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-08-29T03:24:25.286137+00:00", "session_id": "NRS3-20260829-032425", "stage": "GAP_INDEX", "event": "MODERATE_MISMATCH", "detail": {"gap_index": 0.450487, "n_score": 0.75, "r_score": 0.2695}, "gate_reasons": null}
+{"ts": "2026-08-29T03:24:25.286173+00:00", "session_id": "NRS3-20260829-032425", "stage": "GATE_4", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-08-29T03:24:25.286210+00:00", "session_id": "NRS3-20260829-032425", "stage": "GATE_5", "event": "passed", "detail": null, "gate_reasons": []}
+{"ts": "2026-08-29T03:24:25.660422+00:00", "session_id": "NRS3-20260829-032425", "stage": "OUTPUT", "event": "written", "detail": {"gap_index": 0.450487, "label": "MODERATE_MISMATCH"}, "gate_reasons": null}
