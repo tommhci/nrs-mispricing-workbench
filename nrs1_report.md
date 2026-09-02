@@ -1,6 +1,6 @@
 # NRS-1 v3 Logic Hedge Report
-**Session:** `NRS3-20260901-233758` | **Mode:** `stub`
-**Generated:** 2026-09-01 23:37 UTC
+**Session:** `NRS3-20260902-173142` | **Mode:** `stub`
+**Generated:** 2026-09-02 17:31 UTC
 
 > **DISCLAIMER:** This report is a logic-consistency analysis only.
 > It does not constitute investment advice or a recommendation to buy
@@ -36,7 +36,7 @@
 
 ---
 ## 4. Market Data
-**Ticker:** NVDA | **Event Date:** 2026-09-01
+**Ticker:** NVDA | **Event Date:** 2026-09-02
 **5-Day Return:** +8.0% | **Data Quality:** `ok`
 
 ---
