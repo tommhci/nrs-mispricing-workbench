@@ -15,6 +15,14 @@ the discipline around it: every run is reproducible, logged, auditable,
 and wired into a governance control plane (protected paths, pre-commit
 enforcement, attach-time verification).
 
+## Project status and reproducibility
+
+**Academic scope:** The course prototype and its submitted report are frozen as research artifacts; the experimental Gap Index has not been calibrated against financial outcomes.
+
+**Operational distinction (checked 2026-10-27):** The repository's [daily pipeline](.github/workflows/daily_pipeline.yml) is still scheduled at 14:00 and 22:00 UTC on weekdays. It runs `--stub` and may commit updated report/history/audit files to the repository. A recent CI success demonstrates execution, **not** a validated market signal or a new academic release.
+
+To preserve the original submission, run examples in a disposable checkout or restore generated artifacts after testing. The stub command changes tracked files.
+
 ## Highlights
 
 - **Append-only audit trail** (`nrs1_audit.jsonl`) — every agent decision
