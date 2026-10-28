@@ -19,7 +19,9 @@ enforcement, attach-time verification).
 
 **Academic scope:** The course prototype and its submitted report are frozen as research artifacts; the experimental Gap Index has not been calibrated against financial outcomes.
 
-**Operational distinction (checked 2026-10-27):** The repository's [daily pipeline](.github/workflows/daily_pipeline.yml) is still scheduled at 14:00 and 22:00 UTC on weekdays. It runs `--stub` and may commit updated report/history/audit files to the repository. A recent CI success demonstrates execution, **not** a validated market signal or a new academic release.
+**Operational status (checked 2026-10-28):** Scheduled runs were disabled on 2026-10-28. They executed in `--stub` mode, so each run added a commit whose only change was a session ID and a timestamp, plus synthetic audit records replaying one hardcoded source. The pipeline still runs on demand through `workflow_dispatch`.
+
+**Audit-trail composition:** `nrs1_audit.jsonl` holds 143 sessions. 140 of them replay the stub source and therefore report the identical Gap Index (0.450487); two sessions used live data and produced 0.902 and 0.4805. The stub records show that the gates and the logging work — they are not market findings.
 
 To preserve the original submission, run examples in a disposable checkout or restore generated artifacts after testing. The stub command changes tracked files.
 

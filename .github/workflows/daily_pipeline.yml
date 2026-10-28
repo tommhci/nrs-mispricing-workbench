@@ -20,9 +20,21 @@ name: NRS-1 v3 Pipeline
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
-  schedule:
-    - cron: '0 14 * * 1-5'   # Run 1: ~10am ET, weekdays
-    - cron: '0 22 * * 1-5'   # Run 2: ~6pm ET, weekdays
+  # Scheduled runs disabled 2026-10-28.
+  #
+  # Reason: the scheduled job runs `python nrs1_v3.py --stub`, so every run
+  # committed a session ID + timestamp change to nrs1_report.md and appended
+  # synthetic audit records that replay one hardcoded source. Of 143 sessions in
+  # nrs1_audit.jsonl, 140 report the identical Gap Index (0.450487). The
+  # schedule therefore added commits without adding evidence, and contradicted
+  # the repository's stated status as a frozen course artifact.
+  #
+  # The pipeline remains runnable on demand. To re-enable the schedule, uncomment
+  # the two crons below (and set ZHIPU_API_KEY if live mode is wanted).
+  #
+  # schedule:
+  #   - cron: '0 14 * * 1-5'   # Run 1: ~10am ET, weekdays
+  #   - cron: '0 22 * * 1-5'   # Run 2: ~6pm ET, weekdays
   workflow_dispatch:           # Manual trigger from GitHub Actions tab
 
 permissions:
