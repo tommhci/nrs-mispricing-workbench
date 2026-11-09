@@ -31,8 +31,8 @@ To preserve the original submission, run examples in a disposable checkout or re
   is recorded; nothing is silently overwritten.
 - **Run history + SQLite mirror** (`nrs1_history.jsonl` → `db.py`) —
   dashboards and backtests query the same canonical log.
-- **CI workflows** (`.github/workflows/`) — scheduled pipeline and
-  historical backtest validation.
+- **CI workflows** (`.github/workflows/`) — on-demand stub pipeline and
+  manually triggered historical backtest validation; routine schedule is disabled.
 - **Deterministic fallbacks** — stub mode runs the full pipeline with
   zero API keys; missing yfinance/API keys degrade explicitly, never
   silently.
